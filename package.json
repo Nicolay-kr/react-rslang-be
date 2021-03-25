@@ -1,23 +1,22 @@
 {
-  "name": "learn-words-rs-rest-service",
+  "name": "react-rs-lang",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Nicolay-kr/react-rslang-be"
   },
   "type": "commonjs",
-  "description": "LearnWords REST service for RS School",
+  "description": "LearnWords REST service",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "start:dev": "nodemon src/server.js",
+    "dev": "nodemon src/server.js",
     "lint": "eslint ./ --ignore-path .gitignore --fix",
     "heroku-postbuild": "npm install --only=dev"
   },
   "keywords": [
     "rs",
     "school",
-    "rest",
     "node",
     "express",
     "LearnWords"
@@ -40,11 +39,15 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "bcrypt": "^5.0.0",
+    "cloudinary": "^1.25.1",
+    "config": "^3.3.6",
     "cors": "^2.8.5",
     "cross-env": "6.0.3",
     "dotenv": "8.2.0",
     "express": "4.17.1",
     "express-async-errors": "^3.1.1",
+    "express-fileupload": "^1.2.1",
+    "express-validator": "^6.10.0",
     "helmet": "^3.22.0",
     "http-errors": "^1.7.3",
     "http-status-codes": "^1.4.0",
