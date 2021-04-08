@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 const bcrypt = require('bcrypt');
 const { addMethods } = require('../../utils/toResponse');
-const Schema = mongoose.Schema;
 
 const User = new Schema(
   {
@@ -33,10 +32,9 @@ User.pre('findOneAndUpdate', async function preUpdate(next) {
       10
     );
   }
-
   next();
 });
 
 addMethods(User);
 
-module.exports = mongoose.model('users', User);
+module.exports = model('Users', User);

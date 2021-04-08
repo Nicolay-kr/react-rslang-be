@@ -3,7 +3,7 @@ const {
   JWT_SECRET_KEY,
   JWT_REFRESH_SECRET_KEY
 } = require('../../common/config');
-const { AUTHORIZATION_ERROR } = require('../../errors/appErrors');
+// const { AUTHORIZATION_ERROR } = require('../../errors/appErrors');
 
 const ALLOWED_PATHS = ['/signin', '/signup'];
 const DOC_PATH_REGEX = /^\/doc\/?$/;
@@ -21,29 +21,34 @@ function isOpenPath(path) {
 }
 
 const checkAuthentication = (req, res, next) => {
+  // console.log(req.body);
   if (isOpenPath(req.path)) {
     return next();
   }
-
+  // console.log(req.method);
   if (req.path === USERS_PATH && req.method === 'POST') {
     return next();
   }
-
   const rawToken = req.headers.authorization;
+  // console.log('1', rawToken);
   if (!rawToken) {
-    throw new AUTHORIZATION_ERROR();
+    res.json({ message: 'Нет токена' });
   }
-
+  // console.log('2', rawToken);
   try {
     const token = rawToken.slice(7, rawToken.length);
+    console.log(req.path.includes('tokens'));
     const secret = req.path.includes('tokens')
       ? JWT_REFRESH_SECRET_KEY
       : JWT_SECRET_KEY;
+    console.log('secret', secret);
     const { id, tokenId } = jwt.verify(token, secret);
+    console.log('id', id);
+    console.log('tokenId', tokenId);
     req.userId = id;
     req.tokenId = tokenId;
   } catch (error) {
-    throw new AUTHORIZATION_ERROR();
+    res.json({ message: 'Токен не валиден' });
   }
 
   next();
