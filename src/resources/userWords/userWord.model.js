@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema, model, Types } = require('mongoose');
 const { addMethods } = require('../../utils/toResponse');
 
 const UserWordsSchema = new Schema(
   {
-    wordId: { type: mongoose.Schema.Types.ObjectID, required: true },
-    userId: { type: mongoose.Schema.Types.ObjectID, required: true },
+    wordId: { type: Types.ObjectId, required: true },
+    userId: { type: Types.ObjectId, required: true },
     difficulty: { type: String, required: false },
     optional: {
       type: Object,
@@ -19,4 +18,4 @@ UserWordsSchema.index({ wordId: 1, userId: 1 }, { unique: true });
 
 addMethods(UserWordsSchema);
 
-module.exports = mongoose.model('UserWords', UserWordsSchema);
+module.exports = model('UserWords', UserWordsSchema);

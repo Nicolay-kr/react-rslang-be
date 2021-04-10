@@ -1,8 +1,6 @@
 const { OK } = require('http-status-codes');
 const router = require('express').Router({ mergeParams: true });
 
-const { wordId } = require('../../utils/validation/schemas');
-const { validator } = require('../../utils/validation/validator');
 const aggregatedWordsService = require('./aggregatedWord.service');
 const { BAD_REQUEST_ERROR } = require('../../errors/appErrors');
 const extractQueryParam = require('../../utils/getQueryNumberParameter');
@@ -30,7 +28,7 @@ router.get('/', async (req, res) => {
   res.status(OK).send(words);
 });
 
-router.get('/:wordId', validator(wordId, 'params'), async (req, res) => {
+router.get('/:wordId', async (req, res) => {
   const word = await aggregatedWordsService.get(req.params.wordId, req.userId);
 
   res.status(OK).send(word);

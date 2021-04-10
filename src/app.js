@@ -18,10 +18,8 @@ const userTokenRouter = require('./resources/token/token.router');
 const userWordsRouter = require('./resources/userWords/userWord.router');
 const aggregatedWordsRouter = require('./resources/aggregatedWords/aggregatedWord.router');
 const statisticRouter = require('./resources/statistics/statistic.router');
-const settingRouter = require('./resources/settings/setting.router');
 const errorHandler = require('./errors/errorHandler');
 const checkAuthentication = require('./resources/authentication/checkAuthentication');
-const { userIdValidator } = require('./utils/validation/validator');
 
 const app = express();
 const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
@@ -59,15 +57,13 @@ app.use('/signin', signinRouter);
 
 app.use('/users', userRouter);
 
-userRouter.use('/:id/tokens', userIdValidator, userTokenRouter);
+userRouter.use('/:id/tokens', userTokenRouter);
 
-userRouter.use('/:id/words', userIdValidator, userWordsRouter);
+userRouter.use('/:id/words', userWordsRouter);
 
-userRouter.use('/:id/aggregatedWords', userIdValidator, aggregatedWordsRouter);
+userRouter.use('/:id/aggregatedWords', aggregatedWordsRouter);
 
-userRouter.use('/:id/statistics', userIdValidator, statisticRouter);
-
-userRouter.use('/:id/settings', userIdValidator, settingRouter);
+userRouter.use('/:id/statistics', statisticRouter);
 
 app.use((req, res, next) => next(createError(NOT_FOUND)));
 
