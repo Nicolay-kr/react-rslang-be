@@ -1,6 +1,5 @@
-const { Router } = require('express');
+const router = require('express').Router();
 const Statistics = require('./statistic.model');
-const router = Router();
 const {
   getLearnedWordsTotal,
   getLearnedWordsToday,
@@ -54,21 +53,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// validator(statistics, 'body'),.send(statistic.toResponse()
 router.put('/', async (req, res) => {
   try {
     const ID = req.userId;
     const game = req.body;
-    console.log('ID', ID);
-    console.log(req.body);
 
-    const statistics = await Statistics.findOneAndUpdate(
+    await Statistics.findOneAndUpdate(
       { owner: ID },
       { $push: { games: game } },
-      { upsert: true, new: true }
+      { upsert: true }
     );
-    console.log(statistics);
-    // const statistic = await statisticService.upsert(ID, req.body);
     res.json({ message: 'Статистика обновлена' });
   } catch (e) {
     console.log(e);

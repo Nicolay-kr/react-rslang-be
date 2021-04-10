@@ -1,10 +1,8 @@
 const { Schema, model } = require('mongoose');
-const bcrypt = require('bcrypt');
-const { addMethods } = require('../../utils/toResponse');
 
 const User = new Schema(
   {
-    name: String,
+    name: { type: String, Default: 'Unregistered raccoon' },
     email: {
       type: String,
       required: true,
@@ -12,29 +10,15 @@ const User = new Schema(
     },
     password: {
       type: String,
-      required: true,
-      trim: true,
-      minlength: 8
+      required: true
+    },
+    avatarURL: {
+      type: String,
+      default:
+        'http://res.cloudinary.com/nazdac/image/upload/v1616652013/travelAppFolder/dmlfcuvyr79gpkbgg639.jpg'
     }
   },
   { collection: 'users' }
 );
-
-User.pre('save', async function preSave(next) {
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-User.pre('findOneAndUpdate', async function preUpdate(next) {
-  if (this._update.$set.password) {
-    this._update.$set.password = await bcrypt.hash(
-      this._update.$set.password,
-      10
-    );
-  }
-  next();
-});
-
-addMethods(User);
 
 module.exports = model('Users', User);
