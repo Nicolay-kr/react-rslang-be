@@ -16,7 +16,7 @@ router.route('/').post(
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
-        return res.json({
+        return res.status(400).json({
           errors: errors.array(),
           message: 'Некорректно введены данные'
         });
@@ -27,27 +27,30 @@ router.route('/').post(
       const user = await User.findOne({ email });
       console.log(user);
       if (!user) {
-        return res.json({ message: 'Такого пользователя не существует' });
+        return res
+          .status(400)
+          .json({ message: 'Такого пользователя не существует' });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.json({ message: 'Неправильно введён пароль' });
+        return res.status(400).json({ message: 'Неправильно введён пароль' });
       }
 
       const tokens = await tokenService.getTokens(user._id);
 
       console.log(user.avatarURL);
-      res.json({
+      res.status(200).json({
         ...tokens,
         userId: user.id,
         name: user.name,
-        avatarURL: user.avatarURL
+        avatarURL: user.avatarURL,
+        message: 'Вы успешно вошли в ваш аккаунт'
       });
     } catch (e) {
       console.log('signin', e);
-      res.json({ message: 'При входе что-то пошло не так:(' });
+      res.status(400).send(e);
     }
   }
 );
