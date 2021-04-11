@@ -43,10 +43,10 @@ router.post(
       const user = new User({ email, password: hashedPassword, name });
 
       await user.save();
-      res.status(201).json({ message: 'Вы успешно зарегистрировались)' });
+      res.status(200).json({ message: 'Вы успешно зарегистрировались)' });
     } catch (e) {
       console.log('register', e);
-      res.status(500).json({ message: 'Беда с регистрацией' });
+      res.status(400).send(e);
     }
   }
 );
@@ -54,42 +54,31 @@ router.post(
 router.get('/:id', async (req, res) => {
   const user = await User.findOne({ _id: req.params.id });
   if (!user) {
-    res.json({ message: 'Пользователь с таким ID не найден' });
+    res.status(400).json({ message: 'Пользователь с таким ID не найден' });
   }
-  res.send(user.toResponse());
+  res.status(200).send(user.toResponse());
 });
 
 router.put('/:id', async (req, res) => {
   const ID = req.params.id;
+  const avatar = req.files.avatar;
   console.log(ID);
-  // console.log(req);
-  console.log('body', req.body);
-  console.log('req body files', req.body.files);
-  console.log('formData', req.formData);
-  console.log('file', req.file);
-  console.log('files', req.files);
-  console.log('avatar', req.avatar);
+  console.log(avatar);
 
   try {
-    // const result = await cloudinary.uploader.upload(
-    //   req.files.avatar.tempFilePath,
-    //   { upload_preset: 'avatarPreset' }
-    // );
-    // const avatarURL = result.url;
-    // const user = await User.findByIdAndUpdate(ID, {
-    //   avatarURL: result.url,
-    //   new: true
-    // });
-    // const user = User.findById({ ID });
-    // console.log(user);
-    // res.json({ user });
+    const result = await cloudinary.uploader.upload(avatar.tempFilePath, {
+      upload_preset: 'avatarPreset'
+    });
+    const user = await User.findByIdAndUpdate(ID, {
+      avatarURL: result.url,
+      new: true
+    });
+    const avatarURL = result.url || user.avatarURL;
+    res.status(200).json({ avatarURL, message: 'Загрузили новое фото)' });
   } catch (e) {
     console.log(e);
-    res.send(e);
+    res.status(400).send(e);
   }
-  // const userEntity = await userService.update(req.userId, req.body);
-  // res.send(userEntity.toResponse());
-  res.json({ message: 'Всё отлично с загрузкой фото' });
 });
 
 // router.delete('/:id', async (req, res) => {

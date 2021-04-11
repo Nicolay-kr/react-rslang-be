@@ -1,9 +1,8 @@
 require('express-async-errors');
 const express = require('express');
+const fileupload = require('express-fileupload');
 const createError = require('http-errors');
-const swaggerUI = require('swagger-ui-express');
 const path = require('path');
-const YAML = require('yamljs');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -22,17 +21,19 @@ const errorHandler = require('./errors/errorHandler');
 const checkAuthentication = require('./resources/authentication/checkAuthentication');
 
 const app = express();
-const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
+app.use(express.json({ extended: true }));
+app.use(
+  fileupload({
+    useTempFiles: true
+  })
+);
 
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
 
 app.use('/files', express.static(path.join(__dirname, '../files')));
 
 app.use(checkAuthentication);
-
-app.use('/doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.use('/', (req, res, next) => {
   if (req.originalUrl === '/') {

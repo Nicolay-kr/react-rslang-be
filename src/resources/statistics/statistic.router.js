@@ -43,13 +43,14 @@ router.get('/', async (req, res) => {
       sprintGameStats,
       audioGameStats
     };
-    res.json({
-      message: 'Ваша статистика с охуенного бэка готова',
+    res.status(200).json({
+      message: 'Ваша статистика готова',
       statistics,
       parsedStats
     });
   } catch (e) {
     console.log(e);
+    res.status(400).send(e);
   }
 });
 
@@ -63,9 +64,10 @@ router.put('/', async (req, res) => {
       { $push: { games: game } },
       { upsert: true }
     );
-    res.json({ message: 'Статистика обновлена' });
+    res.status(200).json({ message: 'Статистика обновлена' });
   } catch (e) {
     console.log(e);
+    res.status(400).send(e);
   }
 });
 
