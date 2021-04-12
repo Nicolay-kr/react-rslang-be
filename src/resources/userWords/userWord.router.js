@@ -1,17 +1,15 @@
-const { OK, NO_CONTENT } = require('http-status-codes');
 const router = require('express').Router({ mergeParams: true });
 const UserWord = require('./userWord.model');
-const userWordService = require('./userWord.service');
 
 router.get('/', async (req, res) => {
   console.log('ID В ГЕТ ВОРДС', req.userId);
   try {
     const userId = req.userId;
     const userWords = await UserWord.find({ userId });
-    res.json(userWords);
+    res.status(200).json({ userWords, message: 'Ваши слова доставлены' });
   } catch (e) {
     console.log('get user words', e);
-    res.json({ message: 'Что-то пошло не так :(' });
+    res.status(400).send(e);
   }
 });
 
@@ -20,39 +18,89 @@ router.get('/:wordId', async (req, res) => {
     const userId = req.userId;
     const wordId = req.params.wordId;
     const userWord = await UserWord.findOne({ wordId, userId });
-    res.json(userWord);
+    res.status(200).json({ userWord, message: 'Ваше слово доставлено' });
   } catch (e) {
     console.log('user word id', e);
+    res.status(400).send(e);
   }
 });
 
 router.post('/:wordId', async (req, res) => {
-  console.log(req.body);
-  console.log('ID пользователя в создании слова', req.userId);
-  console.log('ID слова в создании слова', req.params.wordId);
-  const userId = req.userId;
-  const wordId = req.params.wordId;
-  const body = req.body;
-  const exist = await UserWord.findOne({ wordId, userId });
-  if (exist) {
-    res.json({ message: 'Слово уже лежит где нужно' });
+  try {
+    const userId = req.userId;
+    const wordId = req.params.wordId;
+    const wordBody = req.body;
+    console.log(wordBody);
+    console.log(userId);
+    console.log(wordId);
+    const wordEntity = await UserWord.findOne({ wordId, userId });
+    console.log(wordEntity);
+    let allUserWords = [];
+    if (wordEntity) {
+      const updatedWord = await UserWord.findOneAndUpdate(
+        { wordId, userId },
+        { $set: wordBody },
+        { new: true }
+      );
+      if (!updatedWord) {
+        res.status(400).json({ message: 'слово не смогло обновиться' });
+      }
+      allUserWords = UserWord.find({ userId });
+      res.status(200).json({
+        allUserWords,
+        word: updatedWord,
+        message: 'Слово обновилось'
+      });
+    }
+    const newUserWord = await UserWord.create({ ...wordBody, userId, wordId });
+    allUserWords = UserWord.find({ userId });
+    let message = 'Слово добавлено в ваш словарь';
+    if (
+      wordBody &&
+      wordBody.difficulty &&
+      wordBody.difficulty === 'weak' &&
+      wordBody.optional.deleted
+    ) {
+      message =
+        'Слово удалено из книги, но вы можете его восстановить в вашем словаре ( вкладка "Удалённые слова" )';
+    }
+    res.status(200).json({
+      newUserWord,
+      allUserWords,
+      message
+    });
+  } catch (e) {
+    console.log('user word id', e);
+    res.status(400).send(e);
   }
-  const userWord = await UserWord.create({ ...body, userId, wordId });
-  res.json(userWord);
 });
 
-router.put('/:wordId', async (req, res) => {
-  const word = await userWordService.update(
-    req.params.wordId,
-    req.userId,
-    req.body
-  );
-  res.status(OK).send(word.toResponse());
-});
+// router.put('/:wordId', async (req, res) => {
+//   try {
+//     const userId = req.userId;
+//     const wordId = req.params.wordId;
+//     const userWord = req.body;
+//     console.log(req.body);
+//     const updatedWord = await UserWord.findOneAndUpdate(
+//       { wordId, userId },
+//       { $set: userWord },
+//       { new: true }
+//     );
+//     if (!updatedWord) {
+//       res.status(400).json({ message: 'слово не смогло обновиться' });
+//     }
+//     res.status(200).send({ updatedWord, message: 'Слово обновилось' });
+//   } catch (e) {
+//     console.log('update userWord', e);
+//     res.status(400).send(e);
+//   }
+// });
 
 router.delete('/:wordId', async (req, res) => {
-  await userWordService.remove(req.params.wordId, req.userId);
-  res.sendStatus(NO_CONTENT);
+  const wordId = req.params.wordId;
+  const userId = req.userId;
+  await UserWord.deleteOne({ wordId, userId });
+  res.status(200).json({ message: 'Слово восстановлено' });
 });
 
 module.exports = router;
