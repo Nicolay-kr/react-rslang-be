@@ -102,19 +102,15 @@ router.put('/:wordId', async (req, res) => {
   try {
     const userId = req.userId;
     const wordId = req.params.wordId;
-    const answer = req.body.answer;
     const value = req.body.value;
-    console.log(answer);
     let updatedWord = {};
     if (value) {
-      console.log('правильно');
       updatedWord = await UserWord.findOneAndUpdate(
         { wordId, userId },
         { $inc: { correct: 1 } },
         { new: true }
       );
     } else {
-      console.log('не правильно');
       updatedWord = await UserWord.findOneAndUpdate(
         { wordId, userId },
         { $inc: { fail: 1 } },
@@ -122,15 +118,6 @@ router.put('/:wordId', async (req, res) => {
       );
     }
     console.log(updatedWord);
-    // updatedWord = { ...wordEntity };
-    // const updatedWord = await UserWord.findOneAndUpdate(
-    //   { wordId, userId },
-    //   { $set: userWord },
-    //   { new: true }
-    // );
-    // if (!updatedWord) {
-    //   res.status(400).json({ message: 'слово не смогло обновиться' });
-    // }
     res.status(200).json({ updatedWord, message: 'Слово обновилось' });
   } catch (e) {
     console.log('update userWord', e);

@@ -32,7 +32,9 @@ const checkAuthentication = (req, res, next) => {
   const rawToken = req.headers.authorization;
   // console.log('1', rawToken);
   if (!rawToken) {
-    res.json({ message: 'Нет токена' });
+    res
+      .status(400)
+      .json({ message: 'Пожалуйста, зайдите / перезайдите в свой аккаунт' });
   }
   // console.log('2', rawToken);
   try {
@@ -48,7 +50,9 @@ const checkAuthentication = (req, res, next) => {
     req.userId = id;
     req.tokenId = tokenId;
   } catch (error) {
-    res.json({ message: 'Токен не валиден' });
+    res
+      .status(400)
+      .json({ message: 'Пожалуйста, зайдите / перезайдите в свой аккаунт' });
   }
 
   next();
