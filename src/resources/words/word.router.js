@@ -23,6 +23,7 @@ router.route('/').get(async (req, res) => {
 });
 
 router.route('/:id').get(async (req, res) => {
+  // console.log('id В роутере', req.params.id);
   const word = await wordService.get(req.params.id);
   res.status(OK).send(word.toResponse());
 });
