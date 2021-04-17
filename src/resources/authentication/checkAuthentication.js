@@ -39,14 +39,14 @@ const checkAuthentication = (req, res, next) => {
   // console.log('2', rawToken);
   try {
     const token = rawToken.slice(7, rawToken.length);
-    console.log(req.path.includes('tokens'));
+    // console.log(req.path.includes('tokens'));
     const secret = req.path.includes('tokens')
       ? JWT_REFRESH_SECRET_KEY
       : JWT_SECRET_KEY;
-    console.log('secret', secret);
+    // console.log('secret', secret);
     const { id, tokenId } = jwt.verify(token, secret);
-    console.log('id', id);
-    console.log('tokenId', tokenId);
+    // console.log('id', id);
+    // console.log('tokenId', tokenId);
     req.userId = id;
     req.tokenId = tokenId;
   } catch (error) {

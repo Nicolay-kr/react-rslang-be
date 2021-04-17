@@ -23,9 +23,9 @@ router.route('/').post(
       }
 
       const { email, password } = req.body;
-      console.log(req.body);
+      // console.log(req.body);
       const user = await User.findOne({ email });
-      console.log(user);
+      // console.log(user);
       if (!user) {
         return res
           .status(400)
@@ -40,7 +40,7 @@ router.route('/').post(
 
       const tokens = await tokenService.getTokens(user._id);
 
-      console.log(user.avatarURL);
+      // console.log(user.avatarURL);
       res.status(200).json({
         ...tokens,
         userId: user.id,
