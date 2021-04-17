@@ -62,8 +62,6 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   const ID = req.params.id;
   const avatar = req.files.avatar;
-  console.log(ID);
-  console.log(avatar);
 
   try {
     const result = await cloudinary.uploader.upload(avatar.tempFilePath, {

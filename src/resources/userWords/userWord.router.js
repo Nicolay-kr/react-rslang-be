@@ -3,7 +3,6 @@ const UserWord = require('./userWord.model');
 const Word = require('../words/word.model');
 
 router.get('/', async (req, res) => {
-  console.log('ID В ГЕТ ВОРДС', req.userId);
   try {
     const userId = req.userId;
     const userWords = await UserWord.find({ userId });
@@ -15,7 +14,6 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/dictionary', async (req, res) => {
-  console.log('ID В Dictionary', req.userId);
   try {
     const userId = req.userId;
     const userWords = await UserWord.find({ userId });
@@ -27,7 +25,15 @@ router.get('/dictionary', async (req, res) => {
         const deleted = item.deleted || false;
         const difficult = item.difficult || false;
         const word = await Word.findOne({ _id: ID });
-        return { ...word._doc, fail, correct, deleted, difficult };
+        return {
+          ...word._doc,
+          fail,
+          correct,
+          deleted,
+          difficult,
+          wordId: ID,
+          id: ID
+        };
       })
     );
     // const idArr = userWords.map(item => {
@@ -51,7 +57,7 @@ router.get('/:wordId', async (req, res) => {
     const userWord = await UserWord.findOne({ wordId, userId });
     res.status(200).json({ userWord, message: 'Ваше слово доставлено' });
   } catch (e) {
-    console.log('user word id', e);
+    console.log('get wordId', e);
     res.status(400).send(e);
   }
 });
@@ -61,9 +67,6 @@ router.post('/:wordId', async (req, res) => {
     const userId = req.userId;
     const wordId = req.params.wordId;
     const wordBody = req.body;
-    console.log(wordBody);
-    console.log(userId);
-    console.log(wordId);
     const wordEntity = await UserWord.findOne({ wordId, userId });
     let allUserWords = [];
     if (wordEntity) {
@@ -86,36 +89,6 @@ router.post('/:wordId', async (req, res) => {
       allUserWords = await UserWord.find({ userId });
       res.status(200).json({ allUserWords, newUserWord, message: 'создал' });
     }
-    // const updatedWord = await UserWord.findOneAndUpdate(
-    // { wordId, userId },
-    // { $set: wordBody },
-    // { new: true }
-    //   if (!updatedWord) {
-    //     res.status(400).json({ message: 'слово не смогло обновиться' });
-    //   }
-    //   allUserWords = await UserWord.find({ userId });
-    //   res.status(200).json({
-    //     allUserWords,
-    //     word: updatedWord,
-    //     message: 'Слово обновилось'
-    //   });
-    // }
-    // allUserWords = await UserWord.find({ userId });
-    // let message = 'Слово добавлено в ваш словарь';
-    // if (
-    //   wordBody &&
-    //   wordBody.difficulty &&
-    //   wordBody.difficulty === 'weak' &&
-    //   wordBody.optional.deleted
-    // ) {
-    //   message =
-    //     'Слово удалено из книги, но вы можете его восстановить в вашем словаре ( вкладка "Удалённые слова" )';
-    // }
-    // res.status(200).json({
-    //   newUserWord,
-    //   allUserWords,
-    //   message
-    // });
   } catch (e) {
     console.log('user word id', e);
     res.status(400).send(e);
@@ -127,6 +100,47 @@ router.delete('/:wordId', async (req, res) => {
   const userId = req.userId;
   await UserWord.deleteOne({ wordId, userId });
   res.status(200).json({ message: 'Слово восстановлено' });
+});
+
+router.put('/answers', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const answersArr = req.body;
+    console.log('userId', userId);
+    console.log('body', answersArr);
+
+    const result = await Promise.all(
+      answersArr.map(async item => {
+        const wordId = item.id;
+        const wordBody = {
+          difficult: item.difficult,
+          group: item.group,
+          page: item.page,
+          deleted: item.deleted
+        };
+        const wordEntity = await UserWord.findOne({ wordId, userId });
+        if (wordEntity) {
+          const updatedWord = await UserWord.findOneAndUpdate(
+            { wordId, userId },
+            { $set: wordBody },
+            { new: true }
+          );
+          console.log(updatedWord);
+          return null;
+        }
+        const newUserWord = await UserWord.create({
+          ...wordBody,
+          userId,
+          wordId
+        });
+        return newUserWord;
+      })
+    );
+    res.status(200).json(result);
+  } catch (e) {
+    console.log('update userWord', e);
+    res.status(400).send(e);
+  }
 });
 
 router.put('/:wordId', async (req, res) => {
@@ -148,7 +162,6 @@ router.put('/:wordId', async (req, res) => {
         { new: true }
       );
     }
-    console.log(updatedWord);
     res.status(200).json({ updatedWord, message: 'Слово обновилось' });
   } catch (e) {
     console.log('update userWord', e);
