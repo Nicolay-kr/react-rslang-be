@@ -1,5 +1,6 @@
 const router = require('express').Router({ mergeParams: true });
 const UserWord = require('./userWord.model');
+const Word = require('../words/word.model');
 
 router.get('/', async (req, res) => {
   console.log('ID В ГЕТ ВОРДС', req.userId);
@@ -7,6 +8,36 @@ router.get('/', async (req, res) => {
     const userId = req.userId;
     const userWords = await UserWord.find({ userId });
     res.status(200).json({ userWords, message: 'Ваши слова доставлены' });
+  } catch (e) {
+    console.log('get user words', e);
+    res.status(400).send(e);
+  }
+});
+
+router.get('/dictionary', async (req, res) => {
+  console.log('ID В Dictionary', req.userId);
+  try {
+    const userId = req.userId;
+    const userWords = await UserWord.find({ userId });
+    const dictionaryWords = await Promise.all(
+      userWords.map(async item => {
+        const ID = item.wordId;
+        const correct = item.correct || 0;
+        const fail = item.fail || 0;
+        const deleted = item.deleted || false;
+        const difficult = item.difficult || false;
+        const word = await Word.findOne({ _id: ID });
+        return { ...word._doc, fail, correct, deleted, difficult };
+      })
+    );
+    // const idArr = userWords.map(item => {
+    //   return item.wordId;
+    // });
+    // const testArr = await Word.find({ _id: { $in: [...idArr] } });
+    res.status(200).json({
+      dictionaryWords,
+      message: 'Ваши слова доставлены'
+    });
   } catch (e) {
     console.log('get user words', e);
     res.status(400).send(e);
