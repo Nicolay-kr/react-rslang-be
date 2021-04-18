@@ -14,16 +14,28 @@ router.get('/', async (req, res) => {
 
     const statistics = await Statistics.findOne({ owner: ID });
 
-    const allGames = statistics.games;
     const todayDate = new Date().toLocaleDateString();
+    let parsedStats = null;
+    if (!statistics) {
+      res.status(200).json({
+        message: 'Ваша статистика готова',
+        parsedStats
+      });
+    }
 
-    const savannaGameStats = getStatsPerGame(allGames, 'savanna');
+    const allGames = statistics.games;
 
-    const matchGameStats = getStatsPerGame(allGames, 'match');
+    const savannaGameStats = getStatsPerGame(allGames, 'savanna', 'Саванна');
 
-    const sprintGameStats = getStatsPerGame(allGames, 'sprint');
+    const matchGameStats = getStatsPerGame(
+      allGames,
+      'match',
+      'Отгадай картинку'
+    );
 
-    const audioGameStats = getStatsPerGame(allGames, 'audio');
+    const sprintGameStats = getStatsPerGame(allGames, 'sprint', 'Спринт');
+
+    const audioGameStats = getStatsPerGame(allGames, 'audio', 'Аудиовызов');
 
     const percentToday = getCorrectPercentToday(allGames, `${todayDate}`);
 
@@ -33,15 +45,12 @@ router.get('/', async (req, res) => {
 
     const learnedWordsTotal = getLearnedWordsTotal(learnedWordsPerDate);
 
-    const parsedStats = {
+    parsedStats = {
       learnedWordsTotal,
       learnedWordsToday,
       learnedWordsPerDate,
       percentToday,
-      savannaGameStats,
-      matchGameStats,
-      sprintGameStats,
-      audioGameStats
+      games: [savannaGameStats, matchGameStats, sprintGameStats, audioGameStats]
     };
     res.status(200).json({
       message: 'Ваша статистика готова',
