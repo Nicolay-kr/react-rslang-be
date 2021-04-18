@@ -1,6 +1,7 @@
 const router = require('express').Router({ mergeParams: true });
 const UserWord = require('./userWord.model');
 const Word = require('../words/word.model');
+const { getMessage } = require('../../utils/wordsCount');
 
 router.get('/', async (req, res) => {
   try {
@@ -105,12 +106,11 @@ router.delete('/:wordId', async (req, res) => {
 router.put('/answers', async (req, res) => {
   try {
     const userId = req.userId;
-    const answersArr = req.body;
-    console.log('userId', userId);
-    console.log('body', answersArr);
-
+    const allAnswersArr = req.body.allAnswers;
+    const correctAnswersArr = req.body.correctArr;
+    const failAnswersArr = req.body.failArr;
     const result = await Promise.all(
-      answersArr.map(async item => {
+      allAnswersArr.map(async item => {
         const wordId = item.id;
         const wordBody = {
           difficult: item.difficult,
@@ -120,12 +120,11 @@ router.put('/answers', async (req, res) => {
         };
         const wordEntity = await UserWord.findOne({ wordId, userId });
         if (wordEntity) {
-          const updatedWord = await UserWord.findOneAndUpdate(
+          await UserWord.findOneAndUpdate(
             { wordId, userId },
             { $set: wordBody },
             { new: true }
           );
-          console.log(updatedWord);
           return null;
         }
         const newUserWord = await UserWord.create({
@@ -136,7 +135,38 @@ router.put('/answers', async (req, res) => {
         return newUserWord;
       })
     );
-    res.status(200).json(result);
+    const correctResult = await Promise.all(
+      correctAnswersArr.map(async item => {
+        const wordId = item.id;
+        const updatedWord = await UserWord.findOneAndUpdate(
+          { wordId, userId },
+          { $inc: { correct: 1 } },
+          { new: true }
+        );
+        return updatedWord;
+      })
+    );
+    const failResult = await Promise.all(
+      failAnswersArr.map(async item => {
+        const wordId = item.id;
+        const updatedWord = await UserWord.findOneAndUpdate(
+          { wordId, userId },
+          { $inc: { fail: 1 } },
+          { new: true }
+        );
+        return updatedWord;
+      })
+    );
+    const newWordsArr = result.filter(word => word !== null);
+    const newWordsCount = newWordsArr.length;
+    const message = getMessage(newWordsCount);
+    res.status(200).json({
+      correctResult,
+      failResult,
+      newWordsArr,
+      newWordsCount,
+      message
+    });
   } catch (e) {
     console.log('update userWord', e);
     res.status(400).send(e);

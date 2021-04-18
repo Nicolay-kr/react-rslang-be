@@ -1,4 +1,4 @@
-function getStatsPerGame(arr, filterElem) {
+function getStatsPerGame(arr, filterElem, russianName) {
   const initArr = arr;
   const game = filterElem;
   let longestSeries = 0;
@@ -19,7 +19,7 @@ function getStatsPerGame(arr, filterElem) {
       .map(elem => elem.totalWords)
       .reduce((acc, val) => acc + val);
   }
-  return { longestSeries, correctPercent, wordsCount };
+  return { name: russianName, longestSeries, correctPercent, wordsCount };
 }
 
 function getCorrectPercentToday(arr, filterElem) {
@@ -48,10 +48,10 @@ function getLearnedWordsPerDate(arr) {
 
   const perDate = allDates.map(elem => {
     const date = elem.map(game => game.date)[0];
-    const learnedWords = elem
+    const words = elem
       .map(game => game.totalWords)
       .reduce((acc, val) => acc + val);
-    return { date, learnedWords };
+    return { date, words };
   });
 
   return perDate;
@@ -74,13 +74,13 @@ function getLearnedWordsTotal(data) {
   const amount = data.reduce((acc, value, i) => {
     if (i === 0) {
       acc.push({
-        name: value.date,
-        words: value.learnedWords
+        date: value.date,
+        words: value.words
       });
     } else if (i > 0) {
       acc.push({
-        name: value.date,
-        words: value.learnedWords + acc[i - 1].words
+        date: value.date,
+        words: value.words + acc[i - 1].words
       });
     }
     return acc;
