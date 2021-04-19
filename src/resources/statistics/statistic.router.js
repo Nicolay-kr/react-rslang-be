@@ -22,8 +22,25 @@ router.get('/', async (req, res) => {
       });
     }
     const allGames = statistics.games;
-    const last = allGames.length - 1;
-    const todayDate = allGames[last].date;
+    const monthArr = [
+      'Января',
+      'Февраля',
+      'Марта',
+      'Апреля',
+      'Мая',
+      'Июня',
+      'Июля',
+      'Августа',
+      'Сентября',
+      'Октября',
+      'Ноября',
+      'Декабря'
+    ];
+    const month = new Date().getUTCMonth();
+    const year = new Date().getUTCFullYear();
+    const day = new Date().getUTCDate();
+
+    const todayDate = `${day} ${monthArr[month]} ${year}`;
 
     const savannaGameStats = getStatsPerGame(allGames, 'savanna', 'Саванна');
 
