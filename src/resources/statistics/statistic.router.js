@@ -46,6 +46,7 @@ router.get('/', async (req, res) => {
     const learnedWordsTotal = getLearnedWordsTotal(learnedWordsPerDate);
 
     parsedStats = {
+      todayDate,
       learnedWordsTotal,
       learnedWordsToday,
       learnedWordsPerDate,
