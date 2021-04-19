@@ -14,7 +14,6 @@ router.get('/', async (req, res) => {
 
     const statistics = await Statistics.findOne({ owner: ID });
 
-    const todayDate = new Date().toLocaleDateString();
     let parsedStats = null;
     if (!statistics) {
       res.status(200).json({
@@ -22,8 +21,9 @@ router.get('/', async (req, res) => {
         parsedStats
       });
     }
-
     const allGames = statistics.games;
+    const last = allGames.length - 1;
+    const todayDate = allGames[last].date;
 
     const savannaGameStats = getStatsPerGame(allGames, 'savanna', 'Саванна');
 
@@ -55,6 +55,7 @@ router.get('/', async (req, res) => {
     };
     res.status(200).json({
       message: 'Ваша статистика готова',
+      todayDate,
       statistics,
       parsedStats
     });
